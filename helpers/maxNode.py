@@ -53,6 +53,20 @@ class Node(object):
         del self._children[indx]
    
     @property
+    def isSelected(self):
+        return self._data.isSelected
+    
+    @isSelected.setter
+    def isSelected(self,value):
+        print self.name,'selecting',value
+        self._data.isSelected = value
+    
+    @isSelected.deleter
+    def isSelected(self):
+        raise IOError('can not delete isSelected Property')
+   
+   
+    @property
     def parent(self):
         return self._parent
     

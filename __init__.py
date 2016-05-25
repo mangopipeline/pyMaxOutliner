@@ -5,7 +5,7 @@ Created on May 24, 2016
 
 @author: carlos
 '''
-from helpers import PySideUic,maxNode
+from helpers import PySideUic,maxNode,iconLib
 from PySide import QtGui, QtCore
 
 import pymxs,MaxPlus,models
@@ -21,6 +21,49 @@ class mainApp(base,form):
         self.setupUi(self)
         self.mxs = pymxs.runtime
         self.setupTree()
+        self.setupEvents()
+    
+    def selChanged(self,sel,dsel):
+        select = [self._treeProxy.mapToSource(s).internalPointer()._data for s in sel.indexes()] 
+        deselect = [self._treeProxy.mapToSource(s).internalPointer()._data for s in dsel.indexes()]
+        self.mxs.deselect(deselect)
+        self.mxs.selectMore(select)
+            
+    
+    def treeRCMenu(self,x):
+        qMenu = QtGui.QMenu(self)
+        props = QtGui.QAction(self)
+        props.setText('Properties')
+        icon = iconLib.getIcon('settings')
+        props.setIcon(QtGui.QIcon(icon))
+        props.triggered.connect(lambda:QtGui.QMessageBox.about(self,'','place holder'))
+        qMenu.addAction(props)
+        qMenu.exec_(self.treeView.mapToGlobal(x))
+
+        '''
+        selMod = tv.selectionModel()
+        sel = selMod.currentIndex()
+        sel = tv.model().mapToSource(sel).internalPointer()
+        data = sel.data()
+        
+        if (type(data) == vTDB.projects):
+            qMenu = QtGui.QMenu(self)
+            props = QtGui.QAction(self)
+            props.setText('Properties')
+            icon = iconLib.getIcon('settings')
+            props.setIcon(QtGui.QIcon(icon))
+            props.triggered.connect(lambda:self.runProjectSettings(data))
+            qMenu.addAction(props)
+            qMenu.exec_(tv.mapToGlobal(p))
+        '''
+    
+    def setupEvents(self):
+        self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.treeView.customContextMenuRequested.connect(lambda x : self.treeRCMenu(x))
+        
+        selMod = self.treeView.selectionModel()
+        selMod.selectionChanged.connect(self.selChanged)
+        
         
     def genSceneData(self):
         rootNode = self.mxs.rootNode
@@ -63,9 +106,13 @@ class mainApp(base,form):
         self._treeProxy.setFilterRole(self._treeModel.filterRole)
         
         self.treeView.setModel(self._treeProxy)
-
+        
+        #
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setAnimated(True)
+        self.treeView.setDragEnabled(True);
+        self.treeView.setAcceptDrops(True);
+        self.treeView.setDropIndicatorShown(True);
         
 
 def run():
