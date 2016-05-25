@@ -33,17 +33,25 @@ class mainApp(base,form):
             for c in childN:
                 id = str(self.mxs.GetHandleByAnim(c))
                 par = root
-                if c.parent:par = nodesList[str(self.mxs.GetHandleByAnim(c.parent))]
+                if c.parent:
+                    pId =  str(self.mxs.GetHandleByAnim(c.parent))
+                    par = nodesList[pId]
+                
+                nodesList[id] = maxNode.Node(c,parent=par)
+                chL =  list(c.children)
+                if len(chL):nChild = nChild+chL
+                '''
+                #print par
                 nodesList[id] = maxNode.Node(c,parent=par)
                 chL = list(c.children)
                 #print par.children()
                 
                 if not len(chL):continue
                 nChild += chL
-                
+                '''
                 
             childN = nChild
-        
+        print root
         return root
     
     def setupTree(self):

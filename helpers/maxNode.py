@@ -14,7 +14,10 @@ class Node(object):
         self.mxs = pymxs.runtime
         
     def iconName(self):
-        return str(self.mxs.superClassOf(self._data))
+        spC = str(self.mxs.superClassOf(self._data))
+        if spC == 'GeometryClass' and str(self.mxs.classOf(self._data)) == "BoneGeometry":
+            return 'BoneGeometry'
+        return spC
     
     @property
     def name(self):
@@ -71,6 +74,8 @@ class Node(object):
             return self.parent.children.index(self)
     
 
+    
+    
     def log(self, tabLevel=-1):
 
         output     = ""
@@ -79,12 +84,15 @@ class Node(object):
         for i in range(tabLevel):
             output += "\t"
         
-        output += "|------" + self._name + "\n"
+        output += "|------" + self.name + "\n"
         
         for child in self._children:
             output += child.log(tabLevel)
         
         tabLevel -= 1
-        output += "\n"
+        #output += "\n"
         
         return output
+    
+    def __repr__(self):
+        return self.log()

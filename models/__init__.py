@@ -58,7 +58,7 @@ class treeModel(QtCore.QAbstractItemModel):
                 icon = QtGui.QIcon(pixmap)
                 return icon
         
-        if role in (QtCore.Qt.DisplayRole,self.sortRole,self.filterRole):
+        if role == QtCore.Qt.DisplayRole:#,self.sortRole,self.filterRole):
             return node.name
 
     def headerData(self,section,orientation,role):
@@ -68,7 +68,7 @@ class treeModel(QtCore.QAbstractItemModel):
         node = index.internalPointer()
         parent = None
         try:
-            parentNode = node.parent
+            parent = node.parent
         except:
             return None
         
@@ -78,7 +78,7 @@ class treeModel(QtCore.QAbstractItemModel):
         if parent == self._data:
             return QtCore.QModelIndex()
         
-        return self.createIndex(parentNode.row(),0,parentNode)
+        return self.createIndex(parent.row(),0,parent)
         
     def index(self,row,column,parent):
         parentNode = self.getNode(parent)
