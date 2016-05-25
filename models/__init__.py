@@ -58,7 +58,7 @@ class treeModel(QtCore.QAbstractItemModel):
                 icon = QtGui.QIcon(pixmap)
                 return icon
         
-        if role == QtCore.Qt.DisplayRole:#,self.sortRole,self.filterRole):
+        if role in (QtCore.Qt.DisplayRole,self.sortRole,self.filterRole):
             return node.name
 
     def headerData(self,section,orientation,role):

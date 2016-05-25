@@ -9,7 +9,7 @@ from helpers import PySideUic,maxNode
 from PySide import QtGui, QtCore
 
 import pymxs,MaxPlus,models
-import os
+import os,time
 
 reload(maxNode)
 reload(models)
@@ -40,18 +40,9 @@ class mainApp(base,form):
                 nodesList[id] = maxNode.Node(c,parent=par)
                 chL =  list(c.children)
                 if len(chL):nChild = nChild+chL
-                '''
-                #print par
-                nodesList[id] = maxNode.Node(c,parent=par)
-                chL = list(c.children)
-                #print par.children()
-                
-                if not len(chL):continue
-                nChild += chL
-                '''
                 
             childN = nChild
-        print root
+
         return root
     
     def setupTree(self):
@@ -72,7 +63,7 @@ class mainApp(base,form):
         self._treeProxy.setFilterRole(self._treeModel.filterRole)
         
         self.treeView.setModel(self._treeProxy)
-        #self.treeView.setRootIsDecorated(True)
+
         self.treeView.setAlternatingRowColors(True)
         self.treeView.setAnimated(True)
         
