@@ -52,8 +52,7 @@ class treeModel(QtCore.QAbstractItemModel):
         
         
         if role == QtCore.Qt.DecorationRole:
-            icon = None
-            pass
+            icon = iconLib.getIcon(node.iconName())
             if icon:
                 pixmap = QtGui.QPixmap(icon,'1')
                 icon = QtGui.QIcon(pixmap)
@@ -64,7 +63,6 @@ class treeModel(QtCore.QAbstractItemModel):
 
     def headerData(self,section,orientation,role):
         if role == QtCore.Qt.DisplayRole:return self._columnNames[section]
-
 
     def parent(self,index):
         node = index.internalPointer()

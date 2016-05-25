@@ -3,14 +3,19 @@ Created on May 24, 2016
 
 @author: carlos
 '''
+import pymxs
+
 class Node(object):
     def __init__(self,data, parent=None):
         self._data = data
         self._parent = None
         self._children = []
         self.parent = parent
-    
+        self.mxs = pymxs.runtime
         
+    def iconName(self):
+        return str(self.mxs.superClassOf(self._data))
+    
     @property
     def name(self):
         return self._data.name
