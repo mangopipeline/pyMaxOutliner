@@ -60,8 +60,8 @@ class mainApp(base,form):
         self._treeProxy.setDynamicSortFilter(True)
         
         self._treeProxy.setFilterCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self._treeProxy.setSortRole(treeModel.sortRole)
-        self._treeProxy.setFilterRole(treeModel.filterRole)
+        self._treeProxy.setSortRole(self._treeModel.sortRole)
+        self._treeProxy.setFilterRole(self._treeModel.filterRole)
         
         self.treeView.setModel(self._treeProxy)
         #self.treeView.setRootIsDecorated(True)
