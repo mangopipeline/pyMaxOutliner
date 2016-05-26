@@ -24,7 +24,6 @@ class treeModel(QtCore.QAbstractItemModel):
     def supportedDropActions(self):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
     
-    
     def flags(self, index):
         defaultFlags =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
         
