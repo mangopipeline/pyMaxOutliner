@@ -98,5 +98,5 @@ class treeModel(QtCore.QAbstractItemModel):
         else:
             return QtCore.QModelIndex()
     
-    def parentObjects(self,objects,parent):
-        print 'not yet implemented'
+    def parentObjects(self,parent,childen):
+        print 'not yet supported'

@@ -25,6 +25,7 @@ class outlinerTreeView(QtGui.QTreeView):
         self.setAnimated(True)
         
         self.setDragDropMode(self.InternalMove)
+        self.setAcceptDrops(True)
         
         self.setDropIndicatorShown(True)
         self.setDragDropOverwriteMode(True)
@@ -86,11 +87,11 @@ class outlinerTreeView(QtGui.QTreeView):
     
     def mousePressEvent(self,event):
         self.setDragEnabled(False)
-        self.setAcceptDrops(False)
+        #self.setAcceptDrops(False)
         
         if event.button() == QtCore.Qt.MiddleButton:
             self.setDragEnabled(True)
-            self.setAcceptDrops(True)
+
         
         super(outlinerTreeView,self).mousePressEvent(event)
     
@@ -107,6 +108,10 @@ class outlinerTreeView(QtGui.QTreeView):
         
         return True
     
+    def startDrag(self,event):
+        #TODO:start our own drag event so we can control the shadow effect of the drag and drop...
+        super(outlinerTreeView,self).startDrag(event)
+    
     def dragMoveEvent(self,event):
         model = self._treeProxy
         dindex = model.mapToSource(self.indexAt(event.pos()))
@@ -120,9 +125,8 @@ class outlinerTreeView(QtGui.QTreeView):
         self._treeModel
         event.accept()
         
-    def dragDropEvent(self,event):
+    def dropEvent(self,event):
         #TODO: this might not be fireing becuse the model doesn't have MIMME types setup...
-        print 'drop!!'
         model = self._treeProxy
         dindex = model.mapToSource(self.indexAt(event.pos()))
         sel = self.getDragNodes()
@@ -131,7 +135,6 @@ class outlinerTreeView(QtGui.QTreeView):
             event.ignore()
             return
         
-        print 'is valid!!!'
         #at this point we let the model edit the data structure...
         self._treeModel.parentObjects(dindex, sel)
         event.accept()
