@@ -20,10 +20,18 @@ class treeModel(QtCore.QAbstractItemModel):
         super(treeModel,self).__init__(parent)
         self._data = data
         self._columnNames = ['Node Name']
-        
-    def flags(self, index):
-        return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
     
+    def supportedDropActions(self):
+        return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
+    
+    
+    def flags(self, index):
+        defaultFlags =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
+        
+        if index.isValid():return QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | defaultFlags
+        
+        return QtCore.Qt.ItemIsDropEnabled | defaultFlags
+        
     def getNode(self,index):
         if index == None:return self._data
         if index.isValid():
@@ -82,8 +90,9 @@ class treeModel(QtCore.QAbstractItemModel):
         
     def index(self,row,column,parent):
         parentNode = self.getNode(parent)
-
-        childItem = parentNode.children[row]
+        childItem = None
+        
+        if len(parentNode.children) > row:childItem = parentNode.children[row]
 
         if childItem:
             return self.createIndex(row, column, childItem)

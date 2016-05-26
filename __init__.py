@@ -8,11 +8,12 @@ Created on May 24, 2016
 from helpers import PySideUic,maxNode,iconLib
 from PySide import QtGui, QtCore
 
-import pymxs,MaxPlus,models
+import pymxs,MaxPlus,models,widgets
 import os,time
 
 reload(maxNode)
 reload(models)
+reload(widgets)
 
 base,form = PySideUic.loadUiType(os.path.join(os.path.dirname(__file__),'views','main.ui'))
 class mainApp(base,form):
@@ -20,6 +21,8 @@ class mainApp(base,form):
         super(mainApp,self).__init__(parent)
         self.setupUi(self)
         self.mxs = pymxs.runtime
+        self.treeView = widgets.outlinerTreeView(parent=parent)
+        self.horizontalLayout_2.addWidget(self.treeView)
         self.setupTree()
         self.setupEvents()
     
@@ -28,7 +31,6 @@ class mainApp(base,form):
         deselect = [self._treeProxy.mapToSource(s).internalPointer()._data for s in dsel.indexes()]
         self.mxs.deselect(deselect)
         self.mxs.selectMore(select)
-            
     
     def treeRCMenu(self,x):
         qMenu = QtGui.QMenu(self)
@@ -39,23 +41,6 @@ class mainApp(base,form):
         props.triggered.connect(lambda:QtGui.QMessageBox.about(self,'','place holder'))
         qMenu.addAction(props)
         qMenu.exec_(self.treeView.mapToGlobal(x))
-
-        '''
-        selMod = tv.selectionModel()
-        sel = selMod.currentIndex()
-        sel = tv.model().mapToSource(sel).internalPointer()
-        data = sel.data()
-        
-        if (type(data) == vTDB.projects):
-            qMenu = QtGui.QMenu(self)
-            props = QtGui.QAction(self)
-            props.setText('Properties')
-            icon = iconLib.getIcon('settings')
-            props.setIcon(QtGui.QIcon(icon))
-            props.triggered.connect(lambda:self.runProjectSettings(data))
-            qMenu.addAction(props)
-            qMenu.exec_(tv.mapToGlobal(p))
-        '''
     
     def setupEvents(self):
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -63,8 +48,7 @@ class mainApp(base,form):
         
         selMod = self.treeView.selectionModel()
         selMod.selectionChanged.connect(self.selChanged)
-        
-        
+     
     def genSceneData(self):
         rootNode = self.mxs.rootNode
         root = maxNode.Node(rootNode)
@@ -108,12 +92,7 @@ class mainApp(base,form):
         self.treeView.setModel(self._treeProxy)
         
         #
-        self.treeView.setAlternatingRowColors(True)
-        self.treeView.setAnimated(True)
-        self.treeView.setDragEnabled(True);
-        self.treeView.setAcceptDrops(True);
-        self.treeView.setDropIndicatorShown(True);
-        
+
 
 def run():
     global pyMaxOutlinerUI

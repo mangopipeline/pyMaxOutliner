@@ -146,25 +146,6 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="QTreeView" name="treeView">
-        <property name="autoScroll">
-         <bool>false</bool>
-        </property>
-        <property name="dragEnabled">
-         <bool>true</bool>
-        </property>
-        <property name="dragDropMode">
-         <enum>QAbstractItemView::DragDrop</enum>
-        </property>
-        <property name="selectionMode">
-         <enum>QAbstractItemView::ExtendedSelection</enum>
-        </property>
-        <attribute name="headerShowSortIndicator" stdset="0">
-         <bool>true</bool>
-        </attribute>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
