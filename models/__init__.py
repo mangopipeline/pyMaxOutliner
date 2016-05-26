@@ -97,4 +97,6 @@ class treeModel(QtCore.QAbstractItemModel):
             return self.createIndex(row, column, childItem)
         else:
             return QtCore.QModelIndex()
-        
+    
+    def parentObjects(self,objects,parent):
+        print 'not yet implemented'

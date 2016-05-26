@@ -19,6 +19,13 @@ class Node(object):
             return 'BoneGeometry'
         return spC
     
+    def isAncestor(self,Node):
+        tNode = self
+        while tNode.parent:
+            if tNode.parent == Node:return True
+            tNode = tNode.parent
+        return False
+    
     @property
     def name(self):
         return self._data.name
