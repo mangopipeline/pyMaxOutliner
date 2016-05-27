@@ -60,12 +60,27 @@ class Node(object):
         del self._children[indx]
    
     @property
+    def isHidden(self):
+        return self._data.isHidden
+    
+    @isHidden.setter
+    def isHidden(self,value):
+        #self._data.isSelected = value
+        if value:
+            self.mxs.hide(self._data)
+        else:
+            self.mxs.unhide(self._data)
+            
+    @isHidden.deleter
+    def isHidden(self):
+        raise IOError('can not delete isSelected Property')
+   
+    @property
     def isSelected(self):
         return self._data.isSelected
     
     @isSelected.setter
     def isSelected(self,value):
-        print self.name,'selecting',value
         self._data.isSelected = value
     
     @isSelected.deleter

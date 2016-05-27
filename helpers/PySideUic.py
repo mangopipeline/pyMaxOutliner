@@ -23,6 +23,7 @@ def loadUiType(uiFile):
         frame = {}
 
         pysideuic.compileUi(f, o, indent=0)
+        
         pyc = compile(o.getvalue(), '<string>', 'exec')
         exec pyc in frame
 

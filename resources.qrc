@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="icons">
+    <file>helpers/iconLib/icons/hidden.png</file>
+    <file>helpers/iconLib/icons/visible.png</file>
+  </qresource>
+</RCC>

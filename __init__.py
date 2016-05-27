@@ -11,7 +11,7 @@ from PySide import QtGui, QtCore
 import os,time,widgets, MaxPlus
 
 
-
+reload(PySideUic)
 reload(widgets)
 
 base,form = PySideUic.loadUiType(os.path.join(os.path.dirname(__file__),'views','main.ui'))
@@ -22,7 +22,14 @@ class mainApp(base,form):
         self.treeView = widgets.outlinerTreeView(parent=parent)
         self.horizontalLayout_2.addWidget(self.treeView)
         self.setupEvents()
-    
+        self.style()
+        
+    def style(self):
+        s = ('QTreeView::indicator {width:20px; height:20px;}'
+             'QTreeView::indicator:checked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
+             'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/hidden.png);}')
+        
+        self.treeView.setStyleSheet(s)
     
     def treeRCMenu(self,x):
         qMenu = QtGui.QMenu(self)

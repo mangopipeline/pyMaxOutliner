@@ -31,6 +31,8 @@ class outlinerTreeView(QtGui.QTreeView):
         self.setDragDropOverwriteMode(True)
         self.setupModel()
         self.connectSignals()
+        self.style()
+    
     
     def setupModel(self):
         self._data = self.genSceneData()
@@ -138,3 +140,4 @@ class outlinerTreeView(QtGui.QTreeView):
         #at this point we let the model edit the data structure...
         self._treeModel.parentObjects(dindex, sel)
         event.accept()
+

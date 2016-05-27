@@ -25,7 +25,7 @@ class treeModel(QtCore.QAbstractItemModel):
         return QtCore.Qt.CopyAction | QtCore.Qt.MoveAction
     
     def flags(self, index):
-        defaultFlags =  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable #| QtCore.Qt.ItemIsEditable
+        defaultFlags =  QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEditable
         
         if index.isValid():return QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsDragEnabled | defaultFlags
         
@@ -57,6 +57,9 @@ class treeModel(QtCore.QAbstractItemModel):
         column = index.column()
         row = index.row()
         
+        if column == 0 and role == QtCore.Qt.CheckStateRole: 
+            if node.isHidden:return QtCore.Qt.Unchecked
+            return QtCore.Qt.Checked
         
         if role == QtCore.Qt.DecorationRole:
             icon = iconLib.getIcon(node.iconName())
@@ -97,6 +100,17 @@ class treeModel(QtCore.QAbstractItemModel):
             return self.createIndex(row, column, childItem)
         else:
             return QtCore.QModelIndex()
+    
+    def setData(self,index, data, role):
+        if not index.isValid(): return False
+        if role == QtCore.Qt.CheckStateRole:
+            node = index.internalPointer()
+            node.isHidden = not node.isHidden
+            return True
+        #role != QtCore.Qt.EditRole:return False
+
+        
+        return False
     
     def parentObjects(self,parent,childen):
         print 'not yet supported'
