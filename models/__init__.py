@@ -3,13 +3,13 @@ Created on May 24, 2016
 
 @author: carlos
 '''
-import sys,os
+import sys,os,cPickle
 from PySide import QtGui, QtCore
 
 helpDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if not helpDir in sys.path:sys.path.append(helpDir)
 from helpers import iconLib 
-
+from itertools import chain
 
 class treeModel(QtCore.QAbstractItemModel):
     sortRole = QtCore.Qt.UserRole
@@ -73,7 +73,7 @@ class treeModel(QtCore.QAbstractItemModel):
 
     def headerData(self,section,orientation,role):
         if role == QtCore.Qt.DisplayRole:return self._columnNames[section]
-
+    
     def parent(self,index):
         node = index.internalPointer()
         parent = None
@@ -82,11 +82,8 @@ class treeModel(QtCore.QAbstractItemModel):
         except:
             return None
         
-        if not parent:
-            parent = self._data
-        
-        if parent == self._data:
-            return QtCore.QModelIndex()
+        if not parent:parent = self._data
+        if parent == self._data:return QtCore.QModelIndex()
         
         return self.createIndex(parent.row(),0,parent)
         
@@ -112,5 +109,43 @@ class treeModel(QtCore.QAbstractItemModel):
         
         return False
     
-    def parentObjects(self,parent,childen):
-        print 'not yet supported'
+    def parentObjects(self,parent,children):
+        pIn = None
+        if parent.isValid():pIn = parent.internalPointer()
+        if not pIn:pIn = self._data
+        
+        destInt = len(pIn.children)
+        
+        for c in children:
+            pI = self.parent(c)
+            cIn = c.internalPointer()
+
+            self.beginMoveRows(pI,c.row(),c.row(),parent,destInt)
+
+            cIn.parent = pIn
+            
+            self.endMoveRows()
+            destInt += 1
+    
+    def insertRows(self,row, count, parent):
+        pass
+    
+    def removeRows(self,row,count,index,parent):
+        pass
+    
+    def moveRows(self,srcPar,sourceRow,count,newPar,desInt):
+        pass
+    
+    def getSelectedIndexs(self):
+        indxAr = []
+        chld = tuple(self._data.children)
+        out = []
+        while len(chld):
+            newChld = [c.children for c in chld if len(c.children)]
+            newChld = tuple(chain.from_iterable(newChld))
+            out += [self.createIndex(i,0,c) for i,c in enumerate(chld) if c.isSelected]
+            
+            chld = newChld
+        
+        return out
+        

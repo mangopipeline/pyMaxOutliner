@@ -33,8 +33,8 @@ class outlinerTreeView(QtGui.QTreeView):
         self.connectSignals()
         self.style()
     
-    
     def setupModel(self):
+        self._updateSel = True
         self._data = self.genSceneData()
         
         self._treeModel =  models.treeModel(self._data)
@@ -52,6 +52,8 @@ class outlinerTreeView(QtGui.QTreeView):
         self._treeProxy.setFilterRole(self._treeModel.filterRole)
         
         self.setModel(self._treeProxy)
+
+        self.syncSelection()
     
     def connectSignals(self):
         #TODO: might want to change this to emit a signal so the actual object selection can happen outisde... might be over kill tho
@@ -59,6 +61,7 @@ class outlinerTreeView(QtGui.QTreeView):
         selMod.selectionChanged.connect(self.selChanged)
     
     def selChanged(self,sel,dsel):
+        if not self._updateSel:return
         select = [self._treeProxy.mapToSource(s).internalPointer()._data for s in sel.indexes()] 
         deselect = [self._treeProxy.mapToSource(s).internalPointer()._data for s in dsel.indexes()]
         self.mxs.deselect(deselect)
@@ -108,6 +111,11 @@ class outlinerTreeView(QtGui.QTreeView):
         for i in indexes: #if the drop node is a child or grand child of any of the selected nodes don't allow...
             if dindex.internalPointer().isAncestor(i.internalPointer()):return False
         
+        #if objects are allready parented to the world and target is the world
+        if not dindex.isValid():
+            for i in indexes:
+                if i.internalPointer()._data.parent == None:return False
+            
         return True
     
     def startDrag(self,event):
@@ -138,6 +146,17 @@ class outlinerTreeView(QtGui.QTreeView):
             return
         
         #at this point we let the model edit the data structure...
+        self._updateSel = False
         self._treeModel.parentObjects(dindex, sel)
+        self._updateSel = True
+        
+        self.syncSelection()
         event.accept()
 
+    def syncSelection(self):
+        sel = self._treeModel.getSelectedIndexs()
+        selMod = self.selectionModel()
+        self._updateSel = False
+        selMod.clearSelection()
+        out = [selMod.select(self._treeProxy.mapFromSource(s),QtGui.QItemSelectionModel.Select) for s in sel] 
+        self._updateSel = True

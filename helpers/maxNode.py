@@ -7,11 +7,12 @@ import pymxs
 
 class Node(object):
     def __init__(self,data, parent=None):
+        self.mxs = pymxs.runtime
         self._data = data
         self._parent = None
         self._children = []
         self.parent = parent
-        self.mxs = pymxs.runtime
+        
         
     def iconName(self):
         spC = str(self.mxs.superClassOf(self._data))
@@ -49,7 +50,6 @@ class Node(object):
     def children(self):
         raise IOError('property ".children" may not be set directly please please change via target objects .parent property')
 
-    
     def __addChild(self,value):
         if value in self._children:return
         self._children = self._children+[value]
@@ -97,6 +97,13 @@ class Node(object):
         if value == self:raise IOError("can not parent node to it's self")
         if self._parent:self._parent.__removeChild(self)
         self._parent = value
+        
+        if value:
+            par = None
+            if value._data != self.mxs.rootNode:par = value._data
+            self._data.parent = par
+            #print self._data,'---->',value._data
+        
         if not value:return
         value.__addChild(self)
         #self._data.parent = value
@@ -108,9 +115,6 @@ class Node(object):
     def row(self):
         if self.parent:
             return self.parent.children.index(self)
-    
-
-    
     
     def log(self, tabLevel=-1):
 
@@ -129,6 +133,7 @@ class Node(object):
         #output += "\n"
         
         return output
-    
+    '''
     def __repr__(self):
         return self.log()
+    '''

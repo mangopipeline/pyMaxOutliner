@@ -29,7 +29,7 @@ class mainApp(base,form):
              'QTreeView::indicator:checked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
              'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/hidden.png);}')
         
-        self.treeView.setStyleSheet(s)
+        #self.treeView.setStyleSheet(s)
     
     def treeRCMenu(self,x):
         qMenu = QtGui.QMenu(self)
