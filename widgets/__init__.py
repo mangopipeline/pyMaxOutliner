@@ -29,8 +29,13 @@ class outlinerTreeView(QtGui.QTreeView):
         
         self.setDropIndicatorShown(True)
         self.setDragDropOverwriteMode(True)
+        
+        
         self.setupModel()
+        self._selMod = self.selectionModel()
+        self.syncSelection()
         self.connectSignals()
+        
         self.style()
     
     def setupModel(self):
@@ -52,13 +57,11 @@ class outlinerTreeView(QtGui.QTreeView):
         self._treeProxy.setFilterRole(self._treeModel.filterRole)
         
         self.setModel(self._treeProxy)
-
-        self.syncSelection()
+        
     
     def connectSignals(self):
         #TODO: might want to change this to emit a signal so the actual object selection can happen outisde... might be over kill tho
-        selMod = self.selectionModel()
-        selMod.selectionChanged.connect(self.selChanged)
+        self._selMod.selectionChanged.connect(self.selChanged)
     
     def selChanged(self,sel,dsel):
         if not self._updateSel:return
@@ -106,15 +109,19 @@ class outlinerTreeView(QtGui.QTreeView):
         return set([model.mapToSource(i) for i in selM.selectedIndexes()])
         
     def isValidDrop(self,indexes,dindex):
+        #TODO: this logic needs to move to the model, and we we'll just ignore things that are allready parented..
+        
         if dindex in indexes:return False #don't drop on selected nodes
-        if not dindex.internalPointer():return True #if there's no node allow to drop in empty space to unparent
+        if not dindex.internalPointer():
+            if all([(i.internalPointer()._data.parent != None) for i in indexes]):return True
+            return False
+        
         for i in indexes: #if the drop node is a child or grand child of any of the selected nodes don't allow...
             if dindex.internalPointer().isAncestor(i.internalPointer()):return False
         
-        #if objects are allready parented to the world and target is the world
-        if not dindex.isValid():
-            for i in indexes:
-                if i.internalPointer()._data.parent == None:return False
+        for i in indexes:
+            if i.internalPointer() == dindex.internalPointer():return False
+        
             
         return True
     
@@ -136,6 +143,7 @@ class outlinerTreeView(QtGui.QTreeView):
         event.accept()
         
     def dropEvent(self,event):
+        self._updateSel = False
         #TODO: this might not be fireing becuse the model doesn't have MIMME types setup...
         model = self._treeProxy
         dindex = model.mapToSource(self.indexAt(event.pos()))
@@ -146,17 +154,15 @@ class outlinerTreeView(QtGui.QTreeView):
             return
         
         #at this point we let the model edit the data structure...
-        self._updateSel = False
+
         self._treeModel.parentObjects(dindex, sel)
-        self._updateSel = True
-        
         self.syncSelection()
         event.accept()
 
+        self._updateSel = True
+
     def syncSelection(self):
-        sel = self._treeModel.getSelectedIndexs()
-        selMod = self.selectionModel()
         self._updateSel = False
-        selMod.clearSelection()
-        out = [selMod.select(self._treeProxy.mapFromSource(s),QtGui.QItemSelectionModel.Select) for s in sel] 
+        sel = self._treeModel.getSelectedIndexs()
+        out = [self._selMod.select(self._treeProxy.mapFromSource(s),QtGui.QItemSelectionModel.Select) for s in sel] 
         self._updateSel = True
