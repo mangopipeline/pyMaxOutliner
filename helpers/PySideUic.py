@@ -1,12 +1,10 @@
-'''
-Created on May 24, 2016
-
-@author: carlos
-'''
-import pysideuic
+#import pysideuic
+import mango.QtPySide.uic as pysideuic
 import xml.etree.ElementTree as xml
 from cStringIO import StringIO
-from PySide import QtGui, QtCore
+#from PySide import QtGui, QtCore
+#PySide2 complaint import
+from mango.Qt import QtGui, QtCore, QtWidgets
 
 def loadUiType(uiFile):
     """
@@ -23,13 +21,12 @@ def loadUiType(uiFile):
         frame = {}
 
         pysideuic.compileUi(f, o, indent=0)
-        
         pyc = compile(o.getvalue(), '<string>', 'exec')
         exec pyc in frame
 
         # Fetch the base_class and form class based on their type
         # in the xml from designer
         form_class = frame['Ui_%s'%form_class]
-        base_class = eval('QtGui.%s'%widget_class)
+        base_class = eval('QtWidgets.%s'%widget_class)
 
     return base_class, form_class

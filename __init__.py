@@ -5,10 +5,14 @@ Created on May 24, 2016
 
 @author: carlos
 '''
-from helpers import PySideUic,iconLib
-from PySide import QtGui, QtCore
+import os,sys
 
-import os,time,widgets, MaxPlus
+sys.path.insert(0,os.path.join(os.path.dirname(__file__),'_resources'))
+
+from helpers import PySideUic,iconLib
+from Qt import QtWidgets,QtGui, QtCore
+
+import time,widgets, MaxPlus
 
 
 reload(PySideUic)
@@ -26,18 +30,18 @@ class mainApp(base,form):
         
     def style(self):
         s = ('QTreeView::indicator {width:20px; height:20px;}'
-             'QTreeView::indicator:checked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
+             'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
              'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/hidden.png);}')
         
         #self.treeView.setStyleSheet(s)
     
     def treeRCMenu(self,x):
-        qMenu = QtGui.QMenu(self)
-        props = QtGui.QAction(self)
+        qMenu = QtWidgets.QMenu(self)
+        props = QtWidgets.QAction(self)
         props.setText('Properties')
         icon = iconLib.getIcon('settings')
-        props.setIcon(QtGui.QIcon(icon))
-        props.triggered.connect(lambda:QtGui.QMessageBox.about(self,'','place holder'))
+        props.setIcon(QtWidgets.QIcon(icon))
+        props.triggered.connect(lambda:QtWidgets.QMessageBox.about(self,'','place holder'))
         qMenu.addAction(props)
         qMenu.exec_(self.treeView.mapToGlobal(x))
     
@@ -55,7 +59,7 @@ def run():
     
 if __name__ == '__main__':
     import sys
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     ui = mainApp()
     ui.show()
     sys.exit(app.exec_())

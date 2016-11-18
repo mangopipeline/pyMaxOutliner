@@ -1,5 +1,5 @@
 
-from PySide import QtGui,QtCore
+from Qt import QtWidgets,QtGui,QtCore
 import pymxs,sys,os
 
 #lets add this so we can import from the helpers package
@@ -14,7 +14,7 @@ import models
 reload(maxNode)
 reload(models)
 
-class outlinerTreeView(QtGui.QTreeView):
+class outlinerTreeView(QtWidgets.QTreeView):
     def __init__(self,parent=True):
         super(outlinerTreeView,self).__init__(parent)
         self.mxs = pymxs.runtime
@@ -44,7 +44,7 @@ class outlinerTreeView(QtGui.QTreeView):
         
         self._treeModel =  models.treeModel(self._data)
         
-        self._treeProxy = QtGui.QSortFilterProxyModel()
+        self._treeProxy = QtWidgets.QSortFilterProxyModel()
         self._treeProxy.setSourceModel(self._treeModel)
         
         self.setSortingEnabled(True)
@@ -164,5 +164,5 @@ class outlinerTreeView(QtGui.QTreeView):
     def syncSelection(self):
         self._updateSel = False
         sel = self._treeModel.getSelectedIndexs()
-        out = [self._selMod.select(self._treeProxy.mapFromSource(s),QtGui.QItemSelectionModel.Select) for s in sel] 
+        out = [self._selMod.select(self._treeProxy.mapFromSource(s),QtWidgets.QItemSelectionModel.Select) for s in sel] 
         self._updateSel = True
