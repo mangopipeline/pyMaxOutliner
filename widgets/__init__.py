@@ -172,7 +172,8 @@ class outlinerTreeView(QtWidgets.QTreeView):
         sel = self._treeModel.getSelectedIndexs(self._treeProxy)
         print 'making q selection took ',(time.time()-st)
         st = time.time()
-        self._selMod.select(sel, QtWidgets.QItemSelectionModel.ClearAndSelect)
+        self._selMod.clearSelection()
+        self._selMod.select(sel, QtWidgets.QItemSelectionModel.Select)
         print 'applying bulk selection took',(time.time()-st)
         
         self._updateSel = True

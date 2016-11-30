@@ -152,7 +152,7 @@ class treeModel(QtCore.QAbstractItemModel):
                 
                 if node.isSelected:
                     mI = proxy.mapFromSource(c)
-                    out.merge(QtWidgets.QItemSelection(mI,mI),QtGui.QItemSelectionModel.Select)
+                    out.select(mI,mI)#,QtGui.QItemSelectionModel.Select)
                     
                     
             chld = grandChild
