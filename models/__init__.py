@@ -3,8 +3,9 @@ Created on May 24, 2016
 
 @author: carlos
 '''
-import sys,os,cPickle
-from PySide import QtGui, QtCore
+import sys,os,cPickle,time
+from Qt import QtWidgets,QtGui, QtCore
+#from PySide import QtGui, QtCore
 
 helpDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if not helpDir in sys.path:sys.path.append(helpDir)
@@ -136,16 +137,23 @@ class treeModel(QtCore.QAbstractItemModel):
     def moveRows(self,srcPar,sourceRow,count,newPar,desInt):
         pass
     
-    def getSelectedIndexs(self):
-        indxAr = []
-        chld = tuple(self._data.children)
-        out = []
+    def getSelectedIndexs(self,proxy):
+        out = QtWidgets.QItemSelection()
+        chld = [self.index(i,0,None) for i in xrange(len(self._data.children))]
+        first = None
+        last = None
+        
         while len(chld):
-            newChld = [c.children for c in chld if len(c.children)]
-            newChld = tuple(chain.from_iterable(newChld))
-            out += [self.createIndex(i,0,c) for i,c in enumerate(chld) if c.isSelected]
-            
-            chld = newChld
-        
+            grandChild = []
+            for c in chld:
+                node = c.internalPointer()
+                for i in  xrange(len(node.children)):
+                    grandChild.append(self.index(i,0,c))
+                
+                if node.isSelected:
+                    mI = proxy.mapFromSource(c)
+                    out.merge(QtWidgets.QItemSelection(mI,mI),QtGui.QItemSelectionModel.Select)
+                    
+                    
+            chld = grandChild
         return out
-        

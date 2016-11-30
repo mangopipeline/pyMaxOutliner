@@ -12,8 +12,7 @@ sys.path.insert(0,os.path.join(os.path.dirname(__file__),'_resources'))
 from helpers import PySideUic,iconLib
 from Qt import QtWidgets,QtGui, QtCore
 
-import time,widgets, MaxPlus
-
+import time,widgets, MaxPlus,pymxs
 
 reload(PySideUic)
 reload(widgets)
@@ -23,10 +22,13 @@ class mainApp(base,form):
     def __init__(self,parent=None):
         super(mainApp,self).__init__(parent)
         self.setupUi(self)
+        self._mxs = pymxs.runtime
+
         self.treeView = widgets.outlinerTreeView(parent=parent)
         self.horizontalLayout_2.addWidget(self.treeView)
         self.setupEvents()
         self.style()
+
         
     def style(self):
         s = ('QTreeView::indicator {width:20px; height:20px;}'
@@ -48,8 +50,9 @@ class mainApp(base,form):
     def setupEvents(self):
         self.treeView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeView.customContextMenuRequested.connect(lambda x : self.treeRCMenu(x))
-        
-     
+    
+    def closeEvent(self,event):
+        self.treeView.killCallbacks()
 
 
 def run():

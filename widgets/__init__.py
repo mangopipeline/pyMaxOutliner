@@ -1,6 +1,6 @@
 
 from Qt import QtWidgets,QtGui,QtCore
-import pymxs,sys,os
+import pymxs,sys,os,MaxPlus
 
 #lets add this so we can import from the helpers package
 homeDir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -37,7 +37,8 @@ class outlinerTreeView(QtWidgets.QTreeView):
         self.connectSignals()
         
         self.style()
-    
+        self.maxCallBacks()
+        
     def setupModel(self):
         self._updateSel = True
         self._data = self.genSceneData()
@@ -67,8 +68,11 @@ class outlinerTreeView(QtWidgets.QTreeView):
         if not self._updateSel:return
         select = [self._treeProxy.mapToSource(s).internalPointer()._data for s in sel.indexes()] 
         deselect = [self._treeProxy.mapToSource(s).internalPointer()._data for s in dsel.indexes()]
+        
+        self._updateSel = False
         self.mxs.deselect(deselect)
         self.mxs.selectMore(select)
+        self._updateSel = True
     
     def genSceneData(self):
         rootNode = self.mxs.rootNode
@@ -162,7 +166,36 @@ class outlinerTreeView(QtWidgets.QTreeView):
         self._updateSel = True
 
     def syncSelection(self):
+        import time
         self._updateSel = False
-        sel = self._treeModel.getSelectedIndexs()
-        out = [self._selMod.select(self._treeProxy.mapFromSource(s),QtWidgets.QItemSelectionModel.Select) for s in sel] 
+        st = time.time()
+        sel = self._treeModel.getSelectedIndexs(self._treeProxy)
+        print 'making q selection took ',(time.time()-st)
+        st = time.time()
+        self._selMod.select(sel, QtWidgets.QItemSelectionModel.ClearAndSelect)
+        print 'applying bulk selection took',(time.time()-st)
+        
         self._updateSel = True
+    
+    def MaxCBSelectionChanged(self,*args,**kwords):
+        if not self._updateSel:return
+        self.syncSelection()
+        #print 'selection might have changed b'
+        
+    def maxCallBacks(self):
+        #register upate callbacks...
+        self._callBackIds = []
+        codes = MaxPlus.NotificationCodes
+        self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.SelectionsetChanged,self.MaxCBSelectionChanged))
+    
+    def keyPressEvent(self,event):
+        if event.key() == QtCore.Qt.Key_F:
+            sel = self._selMod.selection().indexes()
+            if not len(sel):return
+            self.scrollTo(sel[0])
+            print 'f'
+            
+    def killCallbacks(self):
+        print 'destroy registered events'
+        #Remove Call BAcks
+        for cb in self._callBackIds: MaxPlus.NotificationManager.Unregister(cb)
