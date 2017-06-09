@@ -1,5 +1,9 @@
-#import pysideuic
-import mango.QtPySide.uic as pysideuic
+
+try:
+    import pyside2uic as uic
+except:
+    import pysideuic as uic
+	
 import xml.etree.ElementTree as xml
 from cStringIO import StringIO
 #from PySide import QtGui, QtCore
@@ -20,7 +24,7 @@ def loadUiType(uiFile):
         o = StringIO()
         frame = {}
 
-        pysideuic.compileUi(f, o, indent=0)
+        uic.compileUi(f, o, indent=0)
         pyc = compile(o.getvalue(), '<string>', 'exec')
         exec pyc in frame
 

@@ -23,19 +23,16 @@ class mainApp(base,form):
         super(mainApp,self).__init__(parent)
         self.setupUi(self)
         self._mxs = pymxs.runtime
-
         self.treeView = widgets.outlinerTreeView(parent=parent)
         self.horizontalLayout_2.addWidget(self.treeView)
         self.setupEvents()
         self.style()
-
-        
+    
     def style(self):
         s = ('QTreeView::indicator {width:20px; height:20px;}'
-             'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
+             'QTreeView::indicator:checked {image: url(:/icons/helpers/iconLib/icons/visible.png);}'
              'QTreeView::indicator:unchecked {image: url(:/icons/helpers/iconLib/icons/hidden.png);}')
-        
-        #self.treeView.setStyleSheet(s)
+        self.treeView.setStyleSheet(s)
     
     def treeRCMenu(self,x):
         qMenu = QtWidgets.QMenu(self)
@@ -54,11 +51,19 @@ class mainApp(base,form):
     def closeEvent(self,event):
         self.treeView.killCallbacks()
 
+def getMainWindow():
+    try:
+        return MaxPlus.GetQMaxWindow()
+    except:
+        return QtWidgets.QWidget(MaxPlus.GetQMaxMainWindow(), QtCore.Qt.Dialog)
 
 def run():
     global pyMaxOutlinerUI
-    pyMaxOutlinerUI = mainApp(parent=MaxPlus.GetQMaxWindow())
+    pyMaxOutlinerUI = mainApp(parent=getMainWindow())
+    st = time.time()
     pyMaxOutlinerUI.show()
+    print ('show command took %s seconds' % (time.time()-st))
+    return pyMaxOutlinerUI
     
 if __name__ == '__main__':
     import sys

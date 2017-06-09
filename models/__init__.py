@@ -110,7 +110,7 @@ class treeModel(QtCore.QAbstractItemModel):
         
         return False
     
-    def parentObjects(self,parent,children):
+    def parentObjects(self,parent,children,skiScnP=False):
         pIn = None
         if parent.isValid():pIn = parent.internalPointer()
         if not pIn:pIn = self._data
@@ -118,27 +118,71 @@ class treeModel(QtCore.QAbstractItemModel):
         destInt = len(pIn.children)
         
         for c in children:
+            #print parent,'->',c
             pI = self.parent(c)
             cIn = c.internalPointer()
-
-            self.beginMoveRows(pI,c.row(),c.row(),parent,destInt)
-
-            cIn.parent = pIn
             
+            print '-->moveRows1',pI,c.row(),c.row(),parent,destInt
+            
+            self.beginMoveRows(pI,c.row(),c.row(),parent,destInt)
+            cIn.parent = pIn
             self.endMoveRows()
             destInt += 1
     
-    def insertRows(self,row, count, parent):
-        pass
     
+    def parentNode(self,node,parent):
+        if not parent:parent = self._data
+        
+        
+        print 'parenting',node._data,'to',parent._data
+        
+        pI = self.indexFromNode(parent)
+        nI = self.indexFromNode(node)
+        
+        papa = self.parent(nI)
+        
+        '''
+        print '---papa',papa
+        print '---pi',pI
+        print '---ni',nI
+        print '---parent',parent,
+        print '---node',node
+        '''
+        
+        dest = len(parent.children)
+        #print '-->moveRows2',papa,nI.row(),nI.row(),pI,dest
+        self.beginMoveRows(papa,nI.row(),nI.row(),pI,dest)
+        
+        self.endMoveRows()
+        
+    def indexFromNode(self,nd):
+        if not nd.parent:return QtCore.QModelIndex()
+        row = nd.parent.children.index(nd)
+        indx = self.createIndex(row,0,nd)
+        
+        return indx
+        
+    
+    #TODO: replace this method for a delete node
     def removeRows(self,row,count,index,parent):
         pass
     
-    def moveRows(self,srcPar,sourceRow,count,newPar,desInt):
-        pass
+    def insertNode(self,node,parent):
+        if not parent:parent = self._data
+        #print 'inserting',node,'on parent',parent
+        pI = self.indexFromNode(parent)
+        pos = len(parent.children)
+        self.beginInsertRows(pI,pos,pos)
+        node.parent = parent
+        self.endInsertRows()
     
     def getSelectedIndexs(self,proxy):
-        out = QtWidgets.QItemSelection()
+        #pyside and pyside 2 compatible
+        try:
+            out = QtGui.QItemSelection()
+        except:
+            out = QtCore.QItemSelection()
+            
         chld = [self.index(i,0,None) for i in xrange(len(self._data.children))]
         first = None
         last = None
