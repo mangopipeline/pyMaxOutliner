@@ -121,10 +121,9 @@ class treeModel(QtCore.QAbstractItemModel):
         destInt = len(pIn.children)
         
         for c in children:
-            #print parent,'->',c
             pI = self.parent(c)
             cIn = c.internalPointer()
-            
+            if cIn.parent == pIn:return
             self.log.debug('-->moveRows1 %s %s %s %s %s' % (pI,c.row(),c.row(),parent,destInt))
             
             self.beginMoveRows(pI,c.row(),c.row(),parent,destInt)
