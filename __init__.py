@@ -9,21 +9,24 @@ import os,sys
 
 sys.path.insert(0,os.path.join(os.path.dirname(__file__),'_resources'))
 
+from pyMaxOutliner.Qt import QtWidgets,QtGui, QtCore
 from helpers import PySideUic,iconLib
-from Qt import QtWidgets,QtGui, QtCore
-
+import helpers.logLib as log
 import time,widgets, MaxPlus,pymxs
 
 reload(PySideUic)
 reload(widgets)
+reload(log)
 
 base,form = PySideUic.loadUiType(os.path.join(os.path.dirname(__file__),'views','main.ui'))
 class mainApp(base,form):
     def __init__(self,parent=None):
+        self.log = log.genLoger('pyMaxOutliner',os.path.dirname(__file__))
+        self.log.debug('starting pyMaxOutliner')
         super(mainApp,self).__init__(parent)
         self.setupUi(self)
         self._mxs = pymxs.runtime
-        self.treeView = widgets.outlinerTreeView(parent=parent)
+        self.treeView = widgets.outlinerTreeView(self.log,parent=parent)
         self.horizontalLayout_2.addWidget(self.treeView)
         self.setupEvents()
         self.style()
@@ -39,7 +42,7 @@ class mainApp(base,form):
         props = QtWidgets.QAction(self)
         props.setText('Properties')
         icon = iconLib.getIcon('settings')
-        props.setIcon(QtWidgets.QIcon(icon))
+        props.setIcon(QtGui.QIcon(icon))
         props.triggered.connect(lambda:QtWidgets.QMessageBox.about(self,'','place holder'))
         qMenu.addAction(props)
         qMenu.exec_(self.treeView.mapToGlobal(x))

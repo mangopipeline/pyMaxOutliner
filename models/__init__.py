@@ -17,8 +17,9 @@ class treeModel(QtCore.QAbstractItemModel):
     filterRole = QtCore.Qt.UserRole + 1
     matchRole = QtCore.Qt.UserRole + 2
     
-    def __init__(self,data,parent=None):
+    def __init__(self,data,log,parent=None):
         super(treeModel,self).__init__(parent)
+        self.log = log
         self._data = data
         self._columnNames = ['Node Name']
     
@@ -52,9 +53,11 @@ class treeModel(QtCore.QAbstractItemModel):
         return len(self._columnNames)
     
     def data(self,index,role):
+        
         if not index.isValid():return None
         
         node = index.internalPointer()
+        if node.isDeleted:return
         column = index.column()
         row = index.row()
         
@@ -122,37 +125,26 @@ class treeModel(QtCore.QAbstractItemModel):
             pI = self.parent(c)
             cIn = c.internalPointer()
             
-            print '-->moveRows1',pI,c.row(),c.row(),parent,destInt
+            self.log.debug('-->moveRows1 %s %s %s %s %s' % (pI,c.row(),c.row(),parent,destInt))
             
             self.beginMoveRows(pI,c.row(),c.row(),parent,destInt)
             cIn.parent = pIn
             self.endMoveRows()
             destInt += 1
     
-    
     def parentNode(self,node,parent):
         if not parent:parent = self._data
-        
-        
-        print 'parenting',node._data,'to',parent._data
+        self.log.debug('parenting %s to %s' % (node._data,parent._data))
         
         pI = self.indexFromNode(parent)
         nI = self.indexFromNode(node)
         
         papa = self.parent(nI)
         
-        '''
-        print '---papa',papa
-        print '---pi',pI
-        print '---ni',nI
-        print '---parent',parent,
-        print '---node',node
-        '''
-        
         dest = len(parent.children)
-        #print '-->moveRows2',papa,nI.row(),nI.row(),pI,dest
-        self.beginMoveRows(papa,nI.row(),nI.row(),pI,dest)
         
+        self.beginMoveRows(papa,nI.row(),nI.row(),pI,dest)
+        node.parent(parent)
         self.endMoveRows()
         
     def indexFromNode(self,nd):
@@ -161,11 +153,33 @@ class treeModel(QtCore.QAbstractItemModel):
         indx = self.createIndex(row,0,nd)
         
         return indx
-        
     
-    #TODO: replace this method for a delete node
-    def removeRows(self,row,count,index,parent):
-        pass
+    def removeRow(self,nd):
+        self.log.debug('model will now try to remove the row')
+        index = self.indexFromNode(nd)
+        parent = self.indexFromNode(nd.parent)
+        self.log.debug('found qindex and parent qindex')
+        
+        self.log.debug('moving children to root')
+        
+        newP = self.createIndex(-1,-1,self._data)
+        ch = nd.children[:]
+        destInt = len(self._data.children)
+        
+        self.log.debug('moving rows')
+        self.beginMoveRows(index,0,len(ch),newP,destInt)
+        self.log.debug('parenting children to root')
+        for c in ch:c.parent = self._data
+        self.endMoveRows()
+        
+        r = index.row()
+        self.beginRemoveRows(parent,r,r)
+        self.log.debug('removing maxObjHelper parent')
+        nd.parent = None
+        self.log.debug('deleting maxObjHelper')
+        del nd
+        self.endRemoveRows()
+        self.log.debug('done with removeRow Method...')
     
     def insertNode(self,node,parent):
         if not parent:parent = self._data

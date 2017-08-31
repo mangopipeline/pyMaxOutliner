@@ -8,7 +8,7 @@ import xml.etree.ElementTree as xml
 from cStringIO import StringIO
 #from PySide import QtGui, QtCore
 #PySide2 complaint import
-from mango.Qt import QtGui, QtCore, QtWidgets
+from pyMaxOutliner.Qt import QtGui, QtCore, QtWidgets
 
 def loadUiType(uiFile):
     """

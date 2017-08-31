@@ -1,5 +1,5 @@
 
-from Qt import QtWidgets,QtGui,QtCore
+from pyMaxOutliner.Qt import QtWidgets,QtGui,QtCore
 import pymxs,sys,os,MaxPlus,time
 
 #lets add this so we can import from the helpers package
@@ -15,9 +15,9 @@ reload(maxNode)
 reload(models)
 
 class outlinerTreeView(QtWidgets.QTreeView):
-    def __init__(self,parent=True):
+    def __init__(self,log,parent=True):
         super(outlinerTreeView,self).__init__(parent)
-        
+        self.log = log
         self.mxs = pymxs.runtime
         
         self.setSelectionMode(self.ExtendedSelection)
@@ -44,7 +44,7 @@ class outlinerTreeView(QtWidgets.QTreeView):
         self._updateSel = True
         self._data = self.genSceneData()
         
-        self._treeModel =  models.treeModel(self._data)
+        self._treeModel =  models.treeModel(self._data,self.log,self)
         
         #works on pyside and pyside2
         try:
@@ -67,7 +67,7 @@ class outlinerTreeView(QtWidgets.QTreeView):
         st = time.time()
         #this part is kind of slow...
         self.setModel(self._treeProxy)
-        print ('set model took %s seconds (not sure how to speed this up)' % (time.time()-st))
+        self.log.debug('set model took %s seconds (not sure how to speed this up)' % (time.time()-st))
     
     def connectSignals(self):
         #TODO: might want to change this to emit a signal so the actual object selection can happen outisde... might be over kill tho
@@ -163,7 +163,6 @@ class outlinerTreeView(QtWidgets.QTreeView):
     def dropEvent(self,event):
         self._updateSel = False
         
-        
         #TODO:this method can probably be revisted now that the on parent call back is implemenetd.
         #this way we just reparent and let the call handle the tree update, worth a try
         model = self._treeProxy
@@ -172,6 +171,7 @@ class outlinerTreeView(QtWidgets.QTreeView):
         
         if not self.isValidDrop(sel, dindex):
             event.ignore()
+            self._updateSel = True
             return
         
         #at this point we let the model edit the data structure...
@@ -206,31 +206,8 @@ class outlinerTreeView(QtWidgets.QTreeView):
     
     def MaxCBNewParentChange(self,*args,**kwords):
         if not self._updateSel:return
-        #check where the parenting changed
-        for o in self.mxs.objects:
-            id = self.genHndl(o)
-            
-            #when you create a node for some reason a parent changed is fired before a new node event is fired 
-            #so we need to check if this is a new node an if it is exit out...
-            if not id in self._lookUp:
-                continue
-            
-            on = self._lookUp[id]
-            
-            #if no parent state matches let's jump out...
-            if not o.parent and on.parent == self._data:continue
-            
-            #let's get the actual parent helper
-            if o.parent == None:
-                pon = self._data
-            else:
-                pId  = self.genHndl(o.parent)
-                pon = self._lookUp[pId]
-                #if no parent change be out
-                if on.parent == pon:continue
-            
-            self._treeModel.parentNode(on, pon)
-    
+        pass
+        
     def MaxCBNewNode(self,*args,**kwords):
         #collect scene objects and see if we have process them before...
         for a in self.mxs.objects:
@@ -241,13 +218,27 @@ class outlinerTreeView(QtWidgets.QTreeView):
             self._lookUp[id] = nd
             
             self._treeModel.insertNode(nd,parent=self._data)
+    
+    def MaxCBDeleteNodes(self,*args,**kwords):
+        self.log.debug('firing post delete call back!')
+        dList = []
+        for id in self._lookUp:
+            obj = self._lookUp[id]
+            if not obj.isDeleted:continue
+            self.log.debug('%s detected as deleted' % id)
+            dList.append(id)
+            self._treeModel.removeRow(obj)
         
+        self.log.debug('deleting from lookup array')
+        for id in dList:del self._lookUp[id]
+    
     def maxCallBacks(self):
         #register upate callbacks...
         self._callBackIds = []
         codes = MaxPlus.NotificationCodes
         self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.SelectionsetChanged,self.MaxCBSelectionChanged))
         self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.SceneAddedNode,self.MaxCBNewNode))
+        self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.ScenePostDeletedNode,self.MaxCBDeleteNodes))
         self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.NodeUnlinked,self.MaxCBNewParentChange))
         self._callBackIds.append(MaxPlus.NotificationManager.Register(codes.NodeLinked,self.MaxCBNewParentChange))
         
@@ -256,9 +247,11 @@ class outlinerTreeView(QtWidgets.QTreeView):
             sel = self._selMod.selection().indexes()
             if not len(sel):return
             self.scrollTo(sel[0])
-            print 'f'
-            
+    
     def killCallbacks(self):
-        print 'destroy registered events'
+        self.log.debug('destroy registered events')
         #Remove Call BAcks
         for cb in self._callBackIds: MaxPlus.NotificationManager.Unregister(cb)
+
+    def filterEvent(self,o,event):
+        super(outlinerTreeView,self).filterEvent(o,event)

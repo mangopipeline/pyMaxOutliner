@@ -53,8 +53,7 @@ class Node(object):
     def __addChild(self,value):
         if value in self._children:return
         self._children = self._children+[value]
-        
-        
+    
     def __removeChild(self,value):
         indx = self._children.index(value)
         del self._children[indx]
@@ -76,6 +75,10 @@ class Node(object):
         raise IOError('can not delete isSelected Property')
    
     @property
+    def isDeleted(self):
+        return self.mxs.isDeleted(self._data)
+    
+    @property
     def isSelected(self):
         return self._data.isSelected
     
@@ -86,7 +89,6 @@ class Node(object):
     @isSelected.deleter
     def isSelected(self):
         raise IOError('can not delete isSelected Property')
-   
    
     @property
     def parent(self):
@@ -116,6 +118,8 @@ class Node(object):
         if self.parent:
             return self.parent.children.index(self)
     
+    
+     
     def log(self, tabLevel=-1):
 
         output     = ""
